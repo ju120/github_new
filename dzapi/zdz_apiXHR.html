@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      body {
+        background-color: #141313;
+        color: #fff;
+        font-family: Arial, sans-serif;
+      }
+      #responseTable {
+        width: 90vw;
+        margin: 0 auto;
+        border-collapse: collapse;
+      }
+      #responseTable th,
+      #responseTable td {
+        border: 1px solid #333;
+        padding: 10px;
+        text-align: center;
+      }
+      #responseTable th {
+        background-color: #333;
+        color: #fff;
+      }
+      img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        margin: 0 auto;
+      }
+      h1 {
+        text-align: center;
+        color: grey;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>AJAX-TEST</h1>
+    <table id="responseTable" border="1">
+      <thead>
+        <tr>
+          <th colspan="3">FREE ROYALTY IMAGES</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <script>
+      var request = new XMLHttpRequest();
+      request.open("GET", "https://api.pexels.com/v1/search?query=nature&per_page=20", true);
+      request.setRequestHeader("Authorization", "Ea6XOXgz3fbU79L4kGqyUVti5TUc5njyPUMsE0edXwCSZ8vN6tYyOAA9");
+      request.onload = function () {
+        if (request.status === 200) {
+          var picturesData = JSON.parse(request.responseText);
+          var tableBody = document.getElementById("responseTable").getElementsByTagName("tbody")[0];
+          var row;
+          for (let i = 0; i < picturesData.photos.length; i++) {
+            if (i % 3 === 0) {
+              row = tableBody.insertRow(i / 3);
+            }
+
+            var idCell = row.insertCell(i % 3);
+            let img = document.createElement("img");
+            img.src = picturesData.photos[i].src.landscape;
+            img.style.width = "300px";
+            idCell.appendChild(img);
+          }
+        } else {
+          console.log("Error: " + request.status);
+        }
+      };
+
+      request.send();
+    </script>
+  </body>
+</html>
