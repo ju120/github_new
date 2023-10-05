@@ -1,3 +1,4 @@
 var firstName = "Ana";
 var lastName = "Anić";
-console.log(firstName + "" + lastName);
+var fullName = firstName + " " + lastName;
+console.log(fullName);
