@@ -9,20 +9,11 @@
         text-align: center;
         font-family: Cambria, Cochin, Georgia, Times, "Times New Roman", serif;
       }
-      .search {
-        width: 100px;
-        height: 40px;
-        background-color: #c97cca;
-        color: #fff;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 16px;
-      }
+
       #showInput {
         width: 300px;
         height: 30px;
-        background-color: rgb(210, 219, 219);
+        background-color: #bcf0e0;
         border-radius: 3%;
       }
 
@@ -44,7 +35,7 @@
 
       .loader {
         border: 4px solid rgba(255, 255, 255, 0.3);
-        border-top: 4px solid #456b93;
+        border-top: 4px solid #131314;
         border-radius: 50%;
         width: 30px;
         height: 30px;
@@ -66,7 +57,7 @@
   <body>
     <h1>TV Show Search</h1>
     <input id="showInput" type="text" placeholder="Enter the show name" />
-    <button class="search">Search</button>
+
     <div id="loadingMessage">
       <div class="loader"></div>
       Loading...
@@ -83,63 +74,76 @@
       <tbody></tbody>
     </table>
     <script>
-      var searchButton = document.querySelector(".search");
       var showNameInput = document.querySelector("#showInput");
       var loadingMessage = document.querySelector("#loadingMessage");
       var table = document.querySelector("table");
 
-      searchButton.addEventListener("click", () => {
+      var messageDiv;
+      showNameInput.addEventListener("keyup", () => {
         const searchTerm = showNameInput.value.toLowerCase();
+        if (!searchTerm) return;
         const url = `https://api.tvmaze.com/search/shows?q=${searchTerm}`;
 
         loadingMessage.style.display = "block";
-
         fetch(url)
           .then((response) => response.json())
           .then((data) => {
+            isFetchComplete = true;
             const tbody = document.querySelector("tbody");
             tbody.innerHTML = "";
-
+            loadingMessage.style.display = "none";
             const matchingShows = data.filter((result) => {
               const showName = result.show.name.toLowerCase();
               return showName.includes(searchTerm);
             });
-            const messageDiv = document.createElement("div");
-            messageDiv.style.display = "block";
 
             if (matchingShows.length === 0) {
-              messageDiv.textContent = "No such show found!";
-              table.parentNode.insertBefore(messageDiv, table.nextSibling);
+              if (messageDiv) {
+                messageDiv.style.display = "block";
+                messageDiv.textContent = "No such show!";
+                messageDiv.style.fontSize = "2em";
+              } else {
+                messageDiv = document.createElement("div");
+                messageDiv.textContent = "No such show found!";
+                table.parentNode.insertBefore(messageDiv, table.nextSibling);
+              }
             } else {
-              matchingShows.forEach((result) => {
-                const show = result.show;
-                const row = document.createElement("tr");
-
-                const nameShow = document.createElement("td");
-                nameShow.innerText = show.name;
-
-                const scoreEl = document.createElement("td");
-                scoreEl.innerText = show.rating ? show.rating.average : "N/A";
-
-                const genreEl = document.createElement("td");
-                genreEl.innerText = show.genres.join(", ");
-
-                const summaryEl = document.createElement("td");
-                summaryEl.innerHTML = show.summary.replace(/<\/?p>/g, "");
-                summaryEl.innerHTML = summaryEl.innerHTML.replace(/<b>/g, "").replace(/<\/b>/g, "");
-
-                row.appendChild(nameShow);
-                row.appendChild(scoreEl);
-                row.appendChild(genreEl);
-                row.appendChild(summaryEl);
-
-                tbody.appendChild(row);
-                tbody.style.backgroundColor = "#eee";
-              });
+              if (messageDiv) {
+                messageDiv.style.display = "none";
+              }
             }
 
-            loadingMessage.style.display = "none";
+            matchingShows.forEach((result) => {
+              const show = result.show;
+              const row = document.createElement("tr");
+
+              const nameShow = document.createElement("td");
+              nameShow.innerText = show.name;
+              nameShow.style.fontWeight = "800";
+
+              const scoreEl = document.createElement("td");
+              scoreEl.innerText = show.rating ? show.rating.average : "N/A";
+
+              const genreEl = document.createElement("td");
+              genreEl.innerText = show.genres.join(", ");
+
+              const summaryEl = document.createElement("td");
+              summaryEl.innerHTML = show.summary.replace(/<\/?p>/g, "");
+              summaryEl.innerHTML = show.summary.replace(/<\/?b>/g, "");
+
+              // summaryEl.innerHTML = summaryEl.innerHTML.replace(/<b>/g, "").replace(/<\/b>/g, "");
+              // summaryEl.innerHTML = show.summary.replace(/<p>|<\/p>|<b>|<\/b>/g, "");
+
+              row.appendChild(nameShow);
+              row.appendChild(scoreEl);
+              row.appendChild(genreEl);
+              row.appendChild(summaryEl);
+
+              tbody.appendChild(row);
+              tbody.style.backgroundColor = "#ccc";
+            });
           })
+
           .catch((error) => {
             console.error(error);
             loadingMessage.style.display = "none";
